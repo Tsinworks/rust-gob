@@ -104,7 +104,19 @@ impl ::serde_gob::Schema for Schema {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct TypeId(pub(crate) i64);
+pub struct TypeId(pub i64);
+
+impl From<i64> for TypeId {
+    fn from(id: i64) -> Self {
+        TypeId(id)
+    }
+}
+
+impl From<u64> for TypeId {
+    fn from(id: u64) -> Self {
+        TypeId(id as i64)
+    }
+}
 
 impl TypeId {
     pub const BOOL: TypeId = TypeId(1);

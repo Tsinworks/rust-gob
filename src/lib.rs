@@ -31,3 +31,5 @@ pub use error::Error;
 
 pub use de::{Deserializer, StreamDeserializer};
 pub use ser::StreamSerializer;
+pub use serde_gob_derive::*;
+pub use serde_gob::*;

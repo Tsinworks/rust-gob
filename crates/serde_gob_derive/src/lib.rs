@@ -24,11 +24,11 @@ pub fn derive_gob_serialize(input: proc_macro::TokenStream) -> proc_macro::Token
     let inner_impl = if let Some(interpret_as_str) = interpret_as {
         if interpret_as_str == "map[interface{}]interface{}" {
             quote!{
-                ::serde_gob::Schema::register_type(schema,
-                    ::serde_gob::types::Type::build()
+                ::gob::Schema::register_type(schema,
+                    ::gob::types::Type::build()
                         .map_type(
-                            <S::TypeId as ::serde_gob::types::TypeId>::INTERFACE,
-                            <S::TypeId as ::serde_gob::types::TypeId>::INTERFACE
+                            <S::TypeId as ::gob::types::TypeId>::INTERFACE,
+                            <S::TypeId as ::gob::types::TypeId>::INTERFACE
                         ))
             }
         } else {
@@ -51,9 +51,9 @@ pub fn derive_gob_serialize(input: proc_macro::TokenStream) -> proc_macro::Token
     let (impl_generics, ty_generics, where_clause) = container.generics.split_for_impl();
 
     let expanded = quote!{
-        impl #impl_generics ::serde_gob::GobSerialize for #ident #ty_generics #where_clause {
-            fn schema_register<S>(schema: &mut S) -> Result<S::TypeId, S::Error>
-                where S: ::serde_gob::Schema
+        impl #impl_generics ::gob::GobSerialize for #ident #ty_generics #where_clause {
+            fn schema_register<S>(schema: &mut S) -> std::result::Result<S::TypeId, S::Error>
+                where S: ::gob::Schema
             {
                 #inner_impl
             }
@@ -103,7 +103,7 @@ where
         let type_id_ident = variant_field_type_variable(variant_idx, field_idx);
         expanded.extend(quote!{
             let #type_id_ident =
-                <#field_type as ::serde_gob::GobSerialize>::schema_register(schema)?;
+                <#field_type as ::gob::GobSerialize>::schema_register(schema)?;
         });
     }
     expanded

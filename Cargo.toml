@@ -26,6 +26,7 @@ bencher = "0.1.5"
 serde_bytes = "0.10.4"
 partial-io = { version = "0.3.0", features = ["quickcheck"] }
 quickcheck = "0.6.2"
+redis = { version = "0.23", features = ["tokio-comp", "aio"] }
 
 [[bench]]
 name = "serialize"

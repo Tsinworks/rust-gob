@@ -18,7 +18,7 @@ pub fn derive_enum<'a>(
     }
 
     let mut expanded_build_type = quote!{
-        ::serde_gob::types::Type::build()
+        ::gob::types::Type::build()
             .enum_type(#name, #len)
     };
 
@@ -41,7 +41,7 @@ pub fn derive_enum<'a>(
 
     quote!{
         #expanded_type_ids
-        ::serde_gob::Schema::register_type(schema, #expanded_build_type)
+        ::gob::Schema::register_type(schema, #expanded_build_type)
     }
 }
 

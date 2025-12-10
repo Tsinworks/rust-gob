@@ -132,6 +132,7 @@ impl<S: Borrow<Schema>> ser::SerializeStruct for SerializeStructValue<S> {
                 len,
             } => {
                 if *needs_init {
+                    self.ctx.value.write_uint(0); // singleton marker
                     self.ctx.value.write_uint(len as u64);
                     *needs_init = false;
                 }

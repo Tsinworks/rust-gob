@@ -24,8 +24,8 @@ fn derive_struct_newtype<'a>(
     let type_id_ident = variant_field_type_variable(0, 0);
     quote!{
         #expanded_type_ids
-        ::serde_gob::Schema::register_type(schema,
-            ::serde_gob::types::Type::build()
+        ::gob::Schema::register_type(schema,
+            ::gob::types::Type::build()
                 .newtype_struct_type(#name, #type_id_ident))
     }
 }
@@ -33,8 +33,8 @@ fn derive_struct_newtype<'a>(
 fn derive_struct_unit(attr_container: &attr::Container) -> proc_macro2::TokenStream {
     let name = attr_container.name().serialize_name();
     quote!{
-        ::serde_gob::Schema::register_type(schema,
-            ::serde_gob::types::Type::build().unit_struct_type(#name))
+        ::gob::Schema::register_type(schema,
+            ::gob::types::Type::build().unit_struct_type(#name))
     }
 }
 
@@ -48,7 +48,7 @@ fn derive_struct_named_fields<'a>(
     let expanded_type_ids = derive_register_field_types(0, fields.iter());
 
     let mut expanded_build_type = quote!{
-        ::serde_gob::types::Type::build()
+        ::gob::types::Type::build()
             .struct_type(#name, #len)
     };
     for (field_idx, field) in fields.iter().enumerate() {
@@ -60,7 +60,7 @@ fn derive_struct_named_fields<'a>(
 
     quote!{
         #expanded_type_ids
-        ::serde_gob::Schema::register_type(schema, #expanded_build_type)
+        ::gob::Schema::register_type(schema, #expanded_build_type)
     }
 }
 
@@ -74,7 +74,7 @@ fn derive_struct_tuple<'a>(
     let expanded_type_ids = derive_register_field_types(0, fields.iter());
 
     let mut expanded_build_type = quote!{
-        ::serde_gob::types::Type::build()
+        ::gob::types::Type::build()
             .tuple_struct_type(#name, #len)
     };
     for (element_idx, _) in fields.iter().enumerate() {
@@ -86,6 +86,6 @@ fn derive_struct_tuple<'a>(
 
     quote!{
         #expanded_type_ids
-        ::serde_gob::Schema::register_type(schema, #expanded_build_type)
+        ::gob::Schema::register_type(schema, #expanded_build_type)
     }
 }

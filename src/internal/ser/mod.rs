@@ -111,7 +111,8 @@ where
             self.ctx.value.write_bytes("bool".as_bytes());
             self.ctx.value.write_int(TypeId::BOOL.0);
             // write byte count of value
-            self.ctx.value.write_uint(1);
+            let val_len = Message::<Vec<u8>>::get_bool_len(v);
+            self.ctx.value.write_uint(val_len);
             self.ctx.value.write_uint(0); // singleton
             self.ctx.value.write_bool(v);
         } else {
@@ -140,7 +141,8 @@ where
         if self.type_id == TypeId::INTERFACE {
             self.ctx.value.write_bytes("int64".as_bytes());
             self.ctx.value.write_int(TypeId::INT.0);
-            self.ctx.value.write_uint(8);
+            let val_len = Message::<Vec<u8>>::get_int_len(v);
+            self.ctx.value.write_uint(val_len);
             self.ctx.value.write_uint(0); // singleton
             self.ctx.value.write_int(v);
         } else {
@@ -169,7 +171,8 @@ where
         if self.type_id == TypeId::INTERFACE {
             self.ctx.value.write_bytes("uint64".as_bytes());
             self.ctx.value.write_int(TypeId::UINT.0);
-            self.ctx.value.write_uint(8);
+            let val_len = Message::<Vec<u8>>::get_uint_len(v);
+            self.ctx.value.write_uint(val_len);
             self.ctx.value.write_uint(0); // singleton
             self.ctx.value.write_uint(v);
         } else {
@@ -190,7 +193,8 @@ where
         if self.type_id == TypeId::INTERFACE {
             self.ctx.value.write_bytes("float64".as_bytes());
             self.ctx.value.write_int(TypeId::FLOAT.0);
-            self.ctx.value.write_uint(8);
+            let val_len = Message::<Vec<u8>>::get_float_len(v);
+            self.ctx.value.write_uint(val_len);
             self.ctx.value.write_uint(0); // singleton
             self.ctx.value.write_float(v);
         } else {
@@ -211,7 +215,8 @@ where
         if self.type_id == TypeId::INTERFACE {
             self.ctx.value.write_bytes("string".as_bytes());
             self.ctx.value.write_int(TypeId::STRING.0);
-            self.ctx.value.write_uint(v.len() as u64);
+            let val_len = Message::<Vec<u8>>::get_bytes_len(v.as_bytes());
+            self.ctx.value.write_uint(val_len);
             self.ctx.value.write_uint(0); // singleton
             self.ctx.value.write_bytes(v.as_bytes());
         } else {

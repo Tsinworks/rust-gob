@@ -21,7 +21,6 @@ where
     type_id: TypeId,
     defs: &'t Types,
     msg: &'t mut Message<Cursor<&'de [u8]>>,
-    is_map_interface: bool,
 }
 
 impl<'t, 'de> FieldValueDeserializer<'t, 'de> {
@@ -29,9 +28,8 @@ impl<'t, 'de> FieldValueDeserializer<'t, 'de> {
         type_id: TypeId,
         defs: &'t Types,
         msg: &'t mut Message<Cursor<&'de [u8]>>,
-        is_map_interface: bool,
     ) -> FieldValueDeserializer<'t, 'de> {
-        FieldValueDeserializer { type_id, defs, msg, is_map_interface }
+        FieldValueDeserializer { type_id, defs, msg }
     }
 
     fn deserialize_byte_slice(&mut self) -> Result<&'de [u8], Error> {
@@ -78,14 +76,13 @@ impl<'t, 'de> serde::Deserializer<'de> for FieldValueDeserializer<'t, 'de> {
             TypeId::COMPLEX => ComplexValueDeserializer::new(self.msg).deserialize_any(visitor),
             TypeId::INTERFACE => {
                 let k_ty_name = self.deserialize_str_slice()?;
-                let k_ty_id = self.msg.read_int()?;
+                let _k_ty_id = self.msg.read_int()?;
                 
                 // Byte count of value is next; we don't care what it is (it's there
                 // in case we want to ignore the value by skipping it completely).
-                let bytes_count = self.msg.read_uint()?;
+                let _bytes_count = self.msg.read_uint()?;
 
-                let singleton = self.msg.read_uint()?;
-                println!("str: {:?}, tid: {:?}, singleton: {:?}, bytes_count: {:?}", &k_ty_name, k_ty_id, singleton, bytes_count);
+                let _singleton = self.msg.read_uint()?;
                 match k_ty_name {
                     "string" => {
                         visitor.visit_borrowed_str(self.deserialize_str_slice()?)
@@ -149,14 +146,13 @@ impl<'t, 'de> serde::Deserializer<'de> for FieldValueDeserializer<'t, 'de> {
             visitor.visit_bool(self.msg.read_bool()?)
         } else if self.type_id == TypeId::INTERFACE {
             let v_ty_name = self.deserialize_str_slice()?;
-            let v_ty_id = self.msg.read_int()?;
+            let _v_ty_id = self.msg.read_int()?;
             
             // Byte count of value is next; we don't care what it is (it's there
             // in case we want to ignore the value by skipping it completely).
             self.msg.read_uint()?;
 
-            let singleton = self.msg.read_uint()?;
-            println!("value ty: {:?}, tid: {:?}, singleton: {:?}", &v_ty_name, v_ty_id, singleton);
+            let _singleton = self.msg.read_uint()?;
             match v_ty_name {
                 "bool" => {
                     visitor.visit_bool(self.msg.read_bool()?)
@@ -184,14 +180,13 @@ impl<'t, 'de> serde::Deserializer<'de> for FieldValueDeserializer<'t, 'de> {
             visitor.visit_i64(self.msg.read_int()?)
         } else if self.type_id == TypeId::INTERFACE {
             let v_ty_name = self.deserialize_str_slice()?;
-            let v_ty_id = self.msg.read_int()?;
+            let _v_ty_id = self.msg.read_int()?;
             
             // Byte count of value is next; we don't care what it is (it's there
             // in case we want to ignore the value by skipping it completely).
-            let bytes_count = self.msg.read_uint()?;
+            let _bytes_count = self.msg.read_uint()?;
 
-            let singleton = self.msg.read_uint()?;
-            println!("value ty: {:?}, tid: {:?}, singleton: {:?}, bytes_count: {:?}", &v_ty_name, v_ty_id, singleton, bytes_count);
+            let _singleton = self.msg.read_uint()?;
             match v_ty_name {
                 "string" => {
                     visitor.visit_borrowed_str(self.deserialize_str_slice()?)
@@ -231,14 +226,13 @@ impl<'t, 'de> serde::Deserializer<'de> for FieldValueDeserializer<'t, 'de> {
             visitor.visit_borrowed_str(self.deserialize_str_slice()?)
         } else if self.type_id == TypeId::INTERFACE {
             let v_ty_name = self.deserialize_str_slice()?;
-            let v_ty_id = self.msg.read_int()?;
+            let _v_ty_id = self.msg.read_int()?;
             
             // Byte count of value is next; we don't care what it is (it's there
             // in case we want to ignore the value by skipping it completely).
-            let bytes_count = self.msg.read_uint()?;
+            let _bytes_count = self.msg.read_uint()?;
 
-            let singleton = self.msg.read_uint()?;
-            println!("value ty: {:?}, tid: {:?}, singleton: {:?}, bytes_count: {:?}", &v_ty_name, v_ty_id, singleton, bytes_count);
+            let _singleton = self.msg.read_uint()?;
             match v_ty_name {
                 "string" => {
                     visitor.visit_borrowed_str(self.deserialize_str_slice()?)
@@ -317,24 +311,11 @@ impl<'t, 'de> serde::Deserializer<'de> for FieldValueDeserializer<'t, 'de> {
     where
         V: Visitor<'de>,
     {
-        if self.is_map_interface {
-            if let Some(&WireType::Map(ref map_type)) = self.defs.lookup(self.type_id) {
-                if map_type.elem.0 == TypeId::INTERFACE.0 && map_type.key.0 == TypeId::INTERFACE.0 {
-                    let de = MapValueDeserializer::new(map_type, self.defs, self.msg);
-                    de.deserialize_struct(name, fields, visitor)
-                } else {
-                    Err(serde::de::Error::custom("not a map[interface{}]interface{}"))
-                }
-            }
-            else {
-                Err(serde::de::Error::custom("not a map[interface{}]interface{}"))
-            }
-        }
-        else if let Some(&WireType::Struct(ref struct_type)) = self.defs.lookup(self.type_id) {
+        if let Some(&WireType::Struct(ref struct_type)) = self.defs.lookup(self.type_id) {
             let de = StructValueDeserializer::new(struct_type, self.defs, self.msg);
             de.deserialize_struct(name, fields, visitor)
         } else {
-            Err(serde::de::Error::custom("not a struct type nor a map[interface{}]interface{}"))
+            Err(serde::de::Error::custom("not a struct type"))
         }
     }
 

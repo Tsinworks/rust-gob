@@ -140,6 +140,41 @@ impl<B: BufMut> Message<B> {
         self.write_uint(bytes.len() as u64);
         self.buf.put_slice(bytes);
     }
+
+    pub fn get_uint_len(n: u64) -> u64 {
+        if n < 128 {
+            1
+        } else {
+            let nbytes = 8 - (n.leading_zeros() / 8) as u64;
+            1 + nbytes
+        }
+    }
+
+    pub fn get_bool_len(b: bool) -> u64 {
+        match b {
+            false => Self::get_uint_len(0),
+            true => Self::get_uint_len(1),
+        }
+    }
+
+    pub fn get_int_len(n: i64) -> u64 {
+        let u: u64;
+        if n < 0 {
+            u = (!(n as u64) << 1) | 1;
+        } else {
+            u = (n as u64) << 1;
+        }
+        Self::get_uint_len(u)
+    }
+
+    pub fn get_float_len(n: f64) -> u64 {
+        let bits = n.to_bits();
+        Self::get_uint_len(bits.swap_bytes())
+    }
+
+    pub fn get_bytes_len(bytes: &[u8]) -> u64 {
+        Self::get_uint_len(bytes.len() as u64) + bytes.len() as u64
+    }
 }
 
 pub(crate) struct Stream<Io> {

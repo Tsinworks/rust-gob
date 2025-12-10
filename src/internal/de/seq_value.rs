@@ -55,7 +55,7 @@ impl<'f, 'de> de::SeqAccess<'de> for SeqAccess<'f, 'de> {
             return Ok(None);
         }
         self.remaining_count -= 1;
-        let de = FieldValueDeserializer::new(self.element, self.defs, &mut self.msg, false);
+        let de = FieldValueDeserializer::new(self.element, self.defs, &mut self.msg);
         seed.deserialize(de).map(Some)
     }
 
