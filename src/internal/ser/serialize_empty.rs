@@ -1,9 +1,9 @@
 use std::borrow::Borrow;
 
 use serde::{self, Serialize, Serializer};
-use serde_schema::types::Type;
+use serde_gob::types::Type;
 
-use ser::{Schema, TypeId};
+use crate::schema::{Schema, TypeId};
 
 pub struct SerializeEmptyValue<S> {
     schema: S,

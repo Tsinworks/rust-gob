@@ -1,0 +1,15 @@
+
+[package]
+authors = ["Sam Rijs <srijs@airpost.net>", "Dso Tsin <dsotsen@qq.com>"]
+description = "serde support for self-describing, schema-based data formats"
+license = "MIT/Apache-2.0"
+name = "serde_gob"
+#readme = "../README.md"
+version = "0.0.1"
+
+[dependencies]
+serde = "1"
+serde_bytes = { version = "0.10.4", optional = true }
+
+[features]
+bytes = ["serde_bytes"]

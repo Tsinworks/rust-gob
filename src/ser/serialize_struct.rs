@@ -1,10 +1,10 @@
 use serde::ser::{self, Serialize};
 
-use error::Error;
-use internal::ser::{SerializationCtx, SerializeStructValue};
-use internal::types::TypeId;
-use internal::utils::Bow;
-use schema::Schema;
+use crate::error::Error;
+use crate::internal::ser::{SerializationCtx, SerializeStructValue};
+use crate::internal::types::TypeId;
+use crate::internal::utils::Bow;
+use crate::schema::Schema;
 
 use super::output::Output;
 
@@ -18,9 +18,10 @@ impl<'t, O: Output> SerializeStruct<'t, O> {
         type_id: TypeId,
         ctx: SerializationCtx<Bow<'t, Schema>>,
         out: O,
+        len: usize,
     ) -> Result<Self, Error> {
         Ok(SerializeStruct {
-            inner: SerializeStructValue::new(ctx, type_id)?,
+            inner: SerializeStructValue::new(ctx, type_id, len)?,
             out,
         })
     }

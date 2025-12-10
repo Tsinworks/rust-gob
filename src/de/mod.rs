@@ -6,13 +6,13 @@ use bytes::Buf;
 use serde::de::{IgnoredAny, Visitor};
 use serde::{self, Deserialize};
 
-use error::Error;
-use internal::gob::{Message, Stream};
-use internal::types::{TypeId, Types, WireType};
-use internal::utils::{Bow, Buffer};
+use crate::error::Error;
+use crate::internal::gob::{Message, Stream};
+use crate::internal::types::{TypeId, Types, WireType};
+use crate::internal::utils::{Bow, Buffer};
 
-use internal::de::FieldValueDeserializer;
-use internal::de::ValueDeserializer;
+use crate::internal::de::FieldValueDeserializer;
+use crate::internal::de::ValueDeserializer;
 
 pub struct StreamDeserializer<R> {
     defs: Types,
@@ -71,7 +71,7 @@ impl<R> StreamDeserializer<R> {
             let wire_type = {
                 let slice = &self.buffer.bytes()[header.payload_range.clone()];
                 let mut msg = Message::new(Cursor::new(slice));
-                let de = FieldValueDeserializer::new(TypeId::WIRE_TYPE, &self.defs, &mut msg);
+                let de = FieldValueDeserializer::new(TypeId::WIRE_TYPE, &self.defs, &mut msg, false);
                 WireType::deserialize(de)
             }?;
 
@@ -130,7 +130,7 @@ impl<'de> Deserializer<'de> {
             }
 
             let wire_type = {
-                let de = FieldValueDeserializer::new(TypeId::WIRE_TYPE, &self.defs, &mut self.msg);
+                let de = FieldValueDeserializer::new(TypeId::WIRE_TYPE, &self.defs, &mut self.msg, false);
                 WireType::deserialize(de)
             }?;
 

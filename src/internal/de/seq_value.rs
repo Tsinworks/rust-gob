@@ -3,9 +3,9 @@ use std::io::Cursor;
 use serde::de::{self, DeserializeSeed, Deserializer, Visitor};
 
 use super::FieldValueDeserializer;
-use error::Error;
-use internal::gob::Message;
-use internal::types::{TypeId, Types};
+use crate::error::Error;
+use crate::internal::gob::Message;
+use crate::internal::types::{TypeId, Types};
 
 struct SeqAccess<'t, 'de>
 where
@@ -55,7 +55,7 @@ impl<'f, 'de> de::SeqAccess<'de> for SeqAccess<'f, 'de> {
             return Ok(None);
         }
         self.remaining_count -= 1;
-        let de = FieldValueDeserializer::new(self.element, self.defs, &mut self.msg);
+        let de = FieldValueDeserializer::new(self.element, self.defs, &mut self.msg, false);
         seed.deserialize(de).map(Some)
     }
 

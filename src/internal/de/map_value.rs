@@ -3,9 +3,9 @@ use std::io::Cursor;
 use serde::de::{DeserializeSeed, Deserializer, MapAccess, Visitor};
 
 use super::FieldValueDeserializer;
-use error::Error;
-use internal::gob::Message;
-use internal::types::{MapType, Types};
+use crate::error::Error;
+use crate::internal::gob::Message;
+use crate::internal::types::{MapType, Types};
 
 struct MapMapAccess<'t, 'de>
 where
@@ -45,7 +45,7 @@ impl<'f, 'de> MapAccess<'de> for MapMapAccess<'f, 'de> {
             return Ok(None);
         }
         self.remaining_count -= 1;
-        let de = FieldValueDeserializer::new(self.def.key, self.defs, &mut self.msg);
+        let de = FieldValueDeserializer::new(self.def.key, self.defs, &mut self.msg, false);
         seed.deserialize(de).map(Some)
     }
 
@@ -53,7 +53,7 @@ impl<'f, 'de> MapAccess<'de> for MapMapAccess<'f, 'de> {
     where
         V: DeserializeSeed<'de>,
     {
-        let de = FieldValueDeserializer::new(self.def.elem, self.defs, &mut self.msg);
+        let de = FieldValueDeserializer::new(self.def.elem, self.defs, &mut self.msg, false);
         seed.deserialize(de)
     }
 

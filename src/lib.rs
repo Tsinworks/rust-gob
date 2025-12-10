@@ -17,7 +17,7 @@ extern crate safemem;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-extern crate serde_schema;
+extern crate serde_gob;
 
 mod internal;
 mod schema;

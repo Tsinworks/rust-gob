@@ -1,9 +1,9 @@
 use serde::ser::{SerializeSeq, SerializeStruct};
 use serde::{Serialize, Serializer};
-use serde_schema::types::{EnumVariant, StructField, Type};
+use serde_gob::types::{EnumVariant, StructField, Type};
 
-use error::Error;
-use schema::{Schema, TypeId};
+use crate::error::Error;
+use crate::schema::{Schema, TypeId};
 
 use super::{FieldValueSerializer, SerializationCtx};
 
@@ -107,7 +107,7 @@ impl<'a> SerializeWireTypes<'a> {
                     let mut ctx = SerializationCtx::with_schema(Schema::new());
                     ctx.value.write_int(-next_id.0);
                     let ok = {
-                        let mut ser = FieldValueSerializer {
+                        let ser = FieldValueSerializer {
                             ctx,
                             type_id: TypeId::WIRE_TYPE,
                         };

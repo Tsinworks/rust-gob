@@ -4,8 +4,8 @@ use std::ops::Range;
 use byteorder::{BigEndian, ByteOrder};
 use bytes::{Buf, BufMut};
 
-use error::Error;
-use internal::utils::Buffer;
+use crate::error::Error;
+use crate::internal::utils::Buffer;
 
 #[derive(Debug)]
 pub(crate) enum MessageReadError {

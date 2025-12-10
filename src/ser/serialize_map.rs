@@ -1,10 +1,10 @@
 use serde::ser::{self, Serialize};
 
-use error::Error;
-use internal::ser::{SerializationCtx, SerializeMapValue};
-use internal::types::TypeId;
-use internal::utils::Bow;
-use schema::Schema;
+use crate::error::Error;
+use crate::internal::ser::{SerializationCtx, SerializeMapValue};
+use crate::internal::types::TypeId;
+use crate::internal::utils::Bow;
+use crate::schema::Schema;
 
 use super::output::Output;
 

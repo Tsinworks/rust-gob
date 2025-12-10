@@ -7,11 +7,11 @@ use std::sync::Arc;
 use owning_ref::{CloneStableAddress, StableAddress};
 use serde::{Deserialize, Deserializer};
 use serde::{Serialize, Serializer};
-use serde_schema::types::Type;
+use serde_gob::types::Type;
 
-use error::Error;
-use internal::ser::SerializeWireTypes;
-use ser::{Output, OutputPart};
+use crate::error::Error;
+use crate::internal::ser::SerializeWireTypes;
+use crate::ser::{Output, OutputPart};
 
 #[derive(Clone)]
 pub(crate) enum SchemaType {
@@ -28,7 +28,7 @@ impl Deref for SchemaType {
     fn deref(&self) -> &Self::Target {
         match self {
             SchemaType::Builtin(typ) => typ,
-            SchemaType::Custom(ref typ) => typ,
+            SchemaType::Custom(typ) => typ,
         }
     }
 }
@@ -55,7 +55,7 @@ impl Schema {
     #[inline]
     pub(crate) fn lookup(&self, id: TypeId) -> Option<SchemaType> {
         if id.0 < CUSTOM_TYPE_ID_OFFSET {
-            ::internal::types::lookup_builtin(id).map(SchemaType::Builtin)
+            crate::internal::types::lookup_builtin(id).map(SchemaType::Builtin)
         } else {
             match self.schema_types
                 .binary_search_by(|(probe_id, _)| probe_id.cmp(&id))
@@ -74,7 +74,7 @@ impl Schema {
     }
 }
 
-impl ::serde_schema::Schema for Schema {
+impl ::serde_gob::Schema for Schema {
     type TypeId = TypeId;
     type Error = Error;
 
@@ -114,6 +114,7 @@ impl TypeId {
     pub const BYTES: TypeId = TypeId(5);
     pub const STRING: TypeId = TypeId(6);
     pub const COMPLEX: TypeId = TypeId(7);
+    pub const INTERFACE: TypeId = TypeId(8);
     pub(crate) const WIRE_TYPE: TypeId = TypeId(16);
     pub(crate) const ARRAY_TYPE: TypeId = TypeId(17);
     pub(crate) const COMMON_TYPE: TypeId = TypeId(18);
@@ -128,7 +129,7 @@ impl TypeId {
     }
 }
 
-impl ::serde_schema::types::TypeId for TypeId {
+impl ::serde_gob::types::TypeId for TypeId {
     const BOOL: TypeId = TypeId(1);
     const I8: TypeId = TypeId(2);
     const I16: TypeId = TypeId(2);
@@ -146,6 +147,7 @@ impl ::serde_schema::types::TypeId for TypeId {
 
     // not supported yet
     const UNIT: TypeId = TypeId(0);
+    const INTERFACE: TypeId = TypeId(8);
 }
 
 #[doc(hidden)]

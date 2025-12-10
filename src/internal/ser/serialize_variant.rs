@@ -2,11 +2,11 @@ use std::borrow::Borrow;
 
 use owning_ref::OwningRef;
 use serde::ser::{self, Serialize};
-use serde_schema::types::{EnumVariant, Type};
+use serde_gob::types::{EnumVariant, Type};
 
-use error::Error;
-use internal::types::TypeId;
-use schema::{Schema, SchemaType};
+use crate::error::Error;
+use crate::internal::types::TypeId;
+use crate::schema::{Schema, SchemaType};
 
 use super::SerializeStructValue;
 use super::{FieldValueSerializer, SerializationCtx, SerializationOk};

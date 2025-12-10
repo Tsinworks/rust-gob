@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use serde_schema::types::Type;
+use serde_gob::types::Type;
 
 mod wire_type;
 pub(crate) use self::wire_type::WireType;
@@ -20,7 +20,7 @@ pub(crate) use self::struct_type::{FieldType, StructType};
 mod map_type;
 pub(crate) use self::map_type::MapType;
 
-pub use schema::TypeId;
+pub use crate::schema::TypeId;
 
 #[derive(Debug)]
 pub struct Types {

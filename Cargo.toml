@@ -7,18 +7,19 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/srijs/rust-gob"
 documentation = "https://docs.rs/gob"
+edition = "2024"
 
 [dependencies]
 byteorder = "1.2.2"
-bytes = "0.4.6"
-iovec = "0.1.2"
+bytes = "0.4.6" # todo: upgrade
+iovec = "0.1.2" # todo: upgrade
 lazy_static = "1.0.0"
 owning_ref = "0.3.3"
 safemem = "0.3.0"
 serde = "1.0.39"
 serde_derive = "1.0.42"
-serde_schema = { version = "0.0.1", features = ["bytes"] }
-serde_schema_derive = "0.0.1"
+serde_gob = { version = "0.0.1", path = "crates/serde_gob" }
+serde_gob_derive = { version = "0.0.1", path = "crates/serde_gob_derive" }
 
 [dev-dependencies]
 bencher = "0.1.5"

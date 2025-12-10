@@ -5,9 +5,9 @@ use serde::de::{DeserializeSeed, Deserializer, IntoDeserializer, Visitor};
 use serde::de::{EnumAccess, MapAccess, VariantAccess};
 
 use super::FieldValueDeserializer;
-use error::Error;
-use internal::gob::Message;
-use internal::types::{FieldType, StructType, TypeId, Types};
+use crate::error::Error;
+use crate::internal::gob::Message;
+use crate::internal::types::{FieldType, StructType, TypeId, Types};
 
 struct StructAccess<'t, 'de>
 where
@@ -72,7 +72,7 @@ impl<'t, 'de> MapAccess<'de> for StructAccess<'t, 'de> {
     where
         V: DeserializeSeed<'de>,
     {
-        let de = FieldValueDeserializer::new(self.field_id, self.defs, &mut self.msg);
+        let de = FieldValueDeserializer::new(self.field_id, self.defs, &mut self.msg, false);
         seed.deserialize(de)
     }
 }
@@ -106,7 +106,7 @@ impl<'t, 'de> VariantAccess<'de> for StructAccess<'t, 'de> {
     {
         let field = self.current_field()?;
         let val = {
-            let de = FieldValueDeserializer::new(field.id, self.defs, &mut self.msg);
+            let de = FieldValueDeserializer::new(field.id, self.defs, &mut self.msg, false);
             seed.deserialize(de)?
         };
         let field_delta = self.msg.read_uint()?;
@@ -125,7 +125,7 @@ impl<'t, 'de> VariantAccess<'de> for StructAccess<'t, 'de> {
     {
         let field = self.current_field()?;
         let val = {
-            let de = FieldValueDeserializer::new(field.id, self.defs, &mut self.msg);
+            let de = FieldValueDeserializer::new(field.id, self.defs, &mut self.msg, false);
             de.deserialize_seq(visitor)?
         };
         let field_delta = self.msg.read_uint()?;
@@ -148,7 +148,7 @@ impl<'t, 'de> VariantAccess<'de> for StructAccess<'t, 'de> {
     {
         let field = self.current_field()?;
         let val = {
-            let de = FieldValueDeserializer::new(field.id, self.defs, &mut self.msg);
+            let de = FieldValueDeserializer::new(field.id, self.defs, &mut self.msg, false);
             de.deserialize_seq(visitor)?
         };
         let field_delta = self.msg.read_uint()?;

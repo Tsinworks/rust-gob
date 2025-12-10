@@ -4,13 +4,13 @@ use std::io::Write;
 
 use serde::ser::{self, Impossible};
 use serde::Serialize;
-use serde_schema::SchemaSerialize;
+use serde_gob::GobSerialize;
 
-use internal::ser::{FieldValueSerializer, SerializationCtx, SerializeVariantValue};
-use internal::utils::Bow;
+use crate::internal::ser::{FieldValueSerializer, SerializationCtx, SerializeVariantValue};
+use crate::internal::utils::Bow;
 
-use error::Error;
-pub use schema::{Schema, TypeId};
+use crate::error::Error;
+pub use crate::schema::{Schema, TypeId};
 
 mod output;
 pub use self::output::{Output, OutputBuffer, OutputPart, OutputWrite};
@@ -76,7 +76,7 @@ impl<O> StreamSerializer<O> {
     /// Serialize a value onto the stream.
     pub fn serialize<T>(&mut self, value: &T) -> Result<(), Error>
     where
-        T: SchemaSerialize,
+        T: GobSerialize,
         O: Output,
     {
         let type_id = T::schema_register(&mut self.schema)?;
@@ -334,10 +334,10 @@ impl<'t, O: Output> ser::Serializer for Serializer<'t, O> {
     fn serialize_struct(
         mut self,
         _name: &'static str,
-        _len: usize,
+        len: usize,
     ) -> Result<Self::SerializeStruct, Self::Error> {
         self.ctx.value.write_int(self.type_id.0);
-        Ok(SerializeStruct::new(self.type_id, self.ctx, self.out)?)
+        Ok(SerializeStruct::new(self.type_id, self.ctx, self.out, len)?)
     }
 
     fn serialize_struct_variant(

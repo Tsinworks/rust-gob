@@ -1,0 +1,20 @@
+[package]
+authors = ["Sam Rijs <srijs@airpost.net>", "Dso Tsin <dsotsen@qq.com>"]
+description = "serde support for self-describing, schema-based data formats"
+license = "MIT/Apache-2.0"
+name = "serde_gob_derive"
+version = "0.0.1"
+
+[dependencies]
+serde_derive_internals = "0.29"
+quote = "1"
+syn = "2"
+proc-macro2 = "1"
+
+[dev-dependencies]
+serde = "1.0.39"
+serde_derive = "1.0.42"
+serde_gob = { path = "../serde_gob" }
+
+[lib]
+proc-macro = true

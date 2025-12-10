@@ -3,12 +3,12 @@ use std::borrow::{Borrow, BorrowMut};
 use serde::ser::{self, Impossible};
 use serde::Serialize;
 
-use internal::gob::Message;
-use internal::types::TypeId;
+use crate::internal::gob::Message;
+use crate::internal::types::TypeId;
 
-use error::Error;
-use schema::Schema;
-use ser::{Output, OutputPart};
+use crate::error::Error;
+use crate::schema::Schema;
+use crate::ser::{Output, OutputPart};
 
 mod serialize_struct;
 pub(crate) use self::serialize_struct::SerializeStructValue;
@@ -107,8 +107,17 @@ where
 
     #[inline]
     fn serialize_bool(mut self, v: bool) -> Result<Self::Ok, Self::Error> {
-        self.check_type(TypeId::BOOL)?;
-        self.ctx.value.write_bool(v);
+        if self.type_id == TypeId::INTERFACE {
+            self.ctx.value.write_bytes("bool".as_bytes());
+            self.ctx.value.write_int(TypeId::BOOL.0);
+            // write byte count of value
+            self.ctx.value.write_uint(1);
+            self.ctx.value.write_uint(0); // singleton
+            self.ctx.value.write_bool(v);
+        } else {
+            self.check_type(TypeId::BOOL)?;
+            self.ctx.value.write_bool(v);
+        }
         Ok(SerializationOk {
             ctx: self.ctx,
             is_empty: v == false,
@@ -128,8 +137,16 @@ where
     }
 
     fn serialize_i64(mut self, v: i64) -> Result<Self::Ok, Self::Error> {
-        self.check_type(TypeId::INT)?;
-        self.ctx.value.write_int(v);
+        if self.type_id == TypeId::INTERFACE {
+            self.ctx.value.write_bytes("int64".as_bytes());
+            self.ctx.value.write_int(TypeId::INT.0);
+            self.ctx.value.write_uint(8);
+            self.ctx.value.write_uint(0); // singleton
+            self.ctx.value.write_int(v);
+        } else {
+            self.check_type(TypeId::INT)?;
+            self.ctx.value.write_int(v);
+        }
         Ok(SerializationOk {
             ctx: self.ctx,
             is_empty: v == 0,
@@ -149,8 +166,16 @@ where
     }
 
     fn serialize_u64(mut self, v: u64) -> Result<Self::Ok, Self::Error> {
-        self.check_type(TypeId::UINT)?;
-        self.ctx.value.write_uint(v);
+        if self.type_id == TypeId::INTERFACE {
+            self.ctx.value.write_bytes("uint64".as_bytes());
+            self.ctx.value.write_int(TypeId::UINT.0);
+            self.ctx.value.write_uint(8);
+            self.ctx.value.write_uint(0); // singleton
+            self.ctx.value.write_uint(v);
+        } else {
+            self.check_type(TypeId::UINT)?;
+            self.ctx.value.write_uint(v);
+        }
         Ok(SerializationOk {
             ctx: self.ctx,
             is_empty: v == 0,
@@ -162,8 +187,16 @@ where
     }
 
     fn serialize_f64(mut self, v: f64) -> Result<Self::Ok, Self::Error> {
-        self.check_type(TypeId::FLOAT)?;
-        self.ctx.value.write_float(v);
+        if self.type_id == TypeId::INTERFACE {
+            self.ctx.value.write_bytes("float64".as_bytes());
+            self.ctx.value.write_int(TypeId::FLOAT.0);
+            self.ctx.value.write_uint(8);
+            self.ctx.value.write_uint(0); // singleton
+            self.ctx.value.write_float(v);
+        } else {
+            self.check_type(TypeId::FLOAT)?;
+            self.ctx.value.write_float(v);
+        }
         Ok(SerializationOk {
             ctx: self.ctx,
             is_empty: false,
@@ -175,8 +208,16 @@ where
     }
 
     fn serialize_str(mut self, v: &str) -> Result<Self::Ok, Self::Error> {
-        self.check_type(TypeId::STRING)?;
-        self.ctx.value.write_bytes(v.as_bytes());
+        if self.type_id == TypeId::INTERFACE {
+            self.ctx.value.write_bytes("string".as_bytes());
+            self.ctx.value.write_int(TypeId::STRING.0);
+            self.ctx.value.write_uint(v.len() as u64);
+            self.ctx.value.write_uint(0); // singleton
+            self.ctx.value.write_bytes(v.as_bytes());
+        } else {
+            self.check_type(TypeId::STRING)?;
+            self.ctx.value.write_bytes(v.as_bytes());
+        }
         Ok(SerializationOk {
             ctx: self.ctx,
             is_empty: v.len() == 0,
@@ -184,8 +225,13 @@ where
     }
 
     fn serialize_bytes(mut self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
-        self.check_type(TypeId::BYTES)?;
-        self.ctx.value.write_bytes(v);
+        if self.type_id == TypeId::INTERFACE {
+            self.ctx.value.write_int(TypeId::BYTES.0);
+            self.ctx.value.write_bytes(v);
+        } else {
+            self.check_type(TypeId::BYTES)?;
+            self.ctx.value.write_bytes(v);
+        }
         Ok(SerializationOk {
             ctx: self.ctx,
             is_empty: v.len() == 0,
@@ -295,9 +341,9 @@ where
     fn serialize_struct(
         self,
         _name: &'static str,
-        _len: usize,
+        len: usize,
     ) -> Result<Self::SerializeStruct, Self::Error> {
-        SerializeStructValue::new(self.ctx, self.type_id)
+        SerializeStructValue::new(self.ctx, self.type_id, len)
     }
 
     fn serialize_struct_variant(

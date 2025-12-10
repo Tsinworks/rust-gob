@@ -4,16 +4,16 @@ extern crate bytes;
 extern crate gob;
 #[macro_use]
 extern crate serde_derive;
-extern crate serde_schema;
+extern crate serde_gob;
 #[macro_use]
-extern crate serde_schema_derive;
+extern crate serde_gob_derive;
 
 use bencher::Bencher;
 use bytes::Buf;
 use gob::StreamSerializer;
-use serde_schema::SchemaSerialize;
+use serde_gob::GobSerialize;
 
-#[derive(Serialize, SchemaSerialize)]
+#[derive(Serialize, GobSerialize)]
 #[serde(rename = "Response")]
 struct RpcResponse {
     #[serde(rename = "ServiceMethod")]
@@ -24,7 +24,7 @@ struct RpcResponse {
     error: Option<String>,
 }
 
-#[derive(Serialize, SchemaSerialize)]
+#[derive(Serialize, GobSerialize)]
 pub(crate) struct InvokeResponse {
     #[serde(rename = "Payload")]
     pub payload: &'static str,

@@ -3,10 +3,10 @@ use std::io::{Cursor, Write};
 use bytes::Buf;
 use iovec::IoVec;
 
-use internal::gob::Message;
-use internal::utils::BufVec;
+use crate::internal::gob::Message;
+use crate::internal::utils::BufVec;
 
-use error::Error;
+use crate::error::Error;
 
 pub struct OutputPart {
     len_buf_len: u8,
@@ -149,7 +149,7 @@ mod tests {
     use iovec::IoVec;
     use partial_io::{GenNoErrors, PartialRead, PartialWithErrors};
 
-    use internal::gob::Message;
+    use crate::internal::gob::Message;
 
     use super::OutputPart;
 

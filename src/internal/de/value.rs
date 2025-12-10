@@ -3,12 +3,13 @@ use std::io::Cursor;
 use serde;
 use serde::de::{Deserializer, IgnoredAny, Visitor};
 
-use error::Error;
-use internal::gob::Message;
-use internal::types::{TypeId, Types, WireType};
+use crate::error::Error;
+use crate::internal::gob::Message;
+use crate::internal::types::{TypeId, Types, WireType};
 
 use super::field_value::FieldValueDeserializer;
 use super::struct_value::StructValueDeserializer;
+//use super::map_value::MapValueDeserializer;
 
 pub(crate) struct ValueDeserializer<'t, 'de>
 where
@@ -47,7 +48,7 @@ impl<'t, 'de> Deserializer<'de> for ValueDeserializer<'t, 'de> {
             )));
         }
 
-        let de = FieldValueDeserializer::new(self.type_id, &self.defs, &mut self.msg);
+        let de = FieldValueDeserializer::new(self.type_id, &self.defs, &mut self.msg, false);
         return de.deserialize_any(visitor);
     }
 
@@ -71,7 +72,7 @@ impl<'t, 'de> Deserializer<'de> for ValueDeserializer<'t, 'de> {
             )));
         }
 
-        let de = FieldValueDeserializer::new(self.type_id, &self.defs, &mut self.msg);
+        let de = FieldValueDeserializer::new(self.type_id, &self.defs, &mut self.msg, false);
         return de.deserialize_enum(name, variants, visitor);
     }
 
@@ -84,9 +85,26 @@ impl<'t, 'de> Deserializer<'de> for ValueDeserializer<'t, 'de> {
     where
         V: Visitor<'de>,
     {
+        let mut is_map_interface = false;
         if let Some(&WireType::Struct(ref struct_type)) = self.defs.lookup(self.type_id) {
             let de = StructValueDeserializer::new(struct_type, &self.defs, &mut self.msg);
             return de.deserialize_struct(name, fields, visitor);
+        } else if let Some(&WireType::Map(ref map_type)) = self.defs.lookup(self.type_id) {
+            if map_type.elem.0 == TypeId::INTERFACE.0 && map_type.key.0 == TypeId::INTERFACE.0 {
+                // deserialize as map[interface{}]interface{}
+                // let is_singleton = self.msg.read_uint()?;
+                // if is_singleton != 0 {
+                //     return Err(serde::de::Error::custom(
+                //         "map[interface{}]interface{} is not a singleton"
+                //     ));
+                // }
+                // let de = InterfaceValueDeserializer::new(&mut self.msg);
+                // return de.deserialize_struct(name, fields, visitor);
+                is_map_interface = true;
+            }
+
+            // let de = MapValueDeserializer::new(map_type, &self.defs, &mut self.msg);
+            // return de.deserialize_struct(name, fields, visitor);
         }
 
         if self.msg.read_uint()? != 0 {
@@ -95,7 +113,7 @@ impl<'t, 'de> Deserializer<'de> for ValueDeserializer<'t, 'de> {
             )));
         }
 
-        let de = FieldValueDeserializer::new(self.type_id, &self.defs, &mut self.msg);
+        let de = FieldValueDeserializer::new(self.type_id, &self.defs, &mut self.msg, is_map_interface);
         return de.deserialize_struct(name, fields, visitor);
     }
 
